@@ -1,4 +1,4 @@
 # University Manager Website Back-End 🏢
 
 ## admin panel 🔐:
-<img src="./admin_panel.jpg">
+<img src="readme/admin_panel.jpg">

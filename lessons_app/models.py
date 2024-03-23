@@ -1,5 +1,8 @@
 from django.db import models
+from django.utils import timezone
 from django_jalali.db import models as jmodels
+from users_app.models import Professor, Student
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 
 # Create your models here.
@@ -44,3 +47,119 @@ class Week(models.Model):
         verbose_name_plural = 'هفته ها'
 
 
+class LessonPresented(models.Model):
+    semester = models.ForeignKey(
+        Semester,
+        on_delete=models.CASCADE,
+        related_name='lesson_presented',
+        verbose_name='ترم'
+    )
+    lesson = models.ForeignKey(
+        Lesson,
+        on_delete=models.CASCADE,
+        related_name='lesson_presented',
+        verbose_name='درس'
+    )
+    group_number = models.IntegerField(verbose_name='شماره گروه')
+
+    def __str__(self):
+        return f"{self.semester.semester_title} - {self.lesson.course_title} - {self.group_number}"
+
+    class Meta:
+        verbose_name = 'درس ارائه شده'
+        verbose_name_plural = 'دروس ارائه شده'
+
+
+class PresentingLesson(models.Model):
+    lesson_presented = models.ForeignKey(
+        LessonPresented,
+        on_delete=models.CASCADE,
+        related_name='presenting_lesson',
+        verbose_name='درس ارائه شده'
+    )
+    professor = models.ForeignKey(
+        Professor,
+        on_delete=models.CASCADE,
+        related_name='presenting_lesson',
+        verbose_name='استاد'
+    )
+
+    def __str__(self):
+        return f""
+
+    class Meta:
+        verbose_name = 'ارائه دادن درس'
+        verbose_name_plural = 'ارائه دادن دروس'
+
+
+class TakingLesson(models.Model):
+    lesson_presented = models.ForeignKey(
+        LessonPresented,
+        on_delete=models.CASCADE,
+        related_name='taking_lesson',
+        verbose_name='درس ارائه شده'
+    )
+    professor = models.ForeignKey(
+        Student,
+        on_delete=models.CASCADE,
+        related_name='taking_lesson',
+        verbose_name='دانشجو'
+    )
+
+    def __str__(self):
+        return f""
+
+    class Meta:
+        verbose_name = 'اخذ کردن درس'
+        verbose_name_plural = 'اخذ کردن دروس'
+
+
+class Classroom(models.Model):
+    session_number = models.IntegerField(verbose_name='شماره جلسه')
+    session_day_number = models.IntegerField(
+        verbose_name='شماره روز بین 0 تا 6',
+        validators=[
+            MinValueValidator(0),
+            MaxValueValidator(6)
+        ]
+    )
+
+    session_start_time = models.TimeField(verbose_name='ساعت شروع', default=timezone.now())
+    session_start_time = models.TimeField(verbose_name='ساعت پایان')
+
+    def __str__(self):
+        return f""
+
+    class Meta:
+        verbose_name = 'کلاس'
+        verbose_name_plural = 'کلاس ها'
+
+
+class TeachingTime(models.Model):
+    lesson = models.ForeignKey(
+        LessonPresented,
+        on_delete=models.CASCADE,
+        related_name='teaching_time',
+        verbose_name='درس'
+    )
+
+    session = models.ForeignKey(
+        Classroom,
+        on_delete=models.CASCADE,
+        related_name='teaching_time',
+        verbose_name='کلاس'
+    )
+
+    week = models.ForeignKey(
+        Week,
+        on_delete=models.CASCADE,
+        related_name='teaching_time',
+        verbose_name='هفته'
+    )
+
+    def __str__(self):
+        return f""
+
+    class Meta:
+        verbose_name = 'زمان ارائه درس'
+        verbose_name_plural = 'زمان ارائه دروس'
